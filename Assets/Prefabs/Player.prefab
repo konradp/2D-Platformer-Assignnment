@@ -42,7 +42,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.9, y: -0.05}
@@ -71,7 +71,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerController: {fileID: 250488232156627422}
-  maxTimeActive: 0.2
+  maxTimeActive: 0.1
 --- !u!1 &6567435214582935860
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +259,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -899274251
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: -4099418257374492983, guid: 0bf588c8774b37e4ba97190a378b2971, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -346,9 +346,11 @@ MonoBehaviour:
   GFXtransform: {fileID: 8097269919876351205}
   attackHitbox: {fileID: 3437781905516900230}
   attackDelay: 0.2
+  damageImmunityDelay: 0.4
   maxSpeed: 100
   moveSpeed: 8
   jumpForce: 1400
+  enemyPushBackForce: 400
   movementSmoothing: 0.05
 --- !u!61 &5740718251700833352
 BoxCollider2D:

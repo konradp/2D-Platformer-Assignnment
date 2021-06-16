@@ -7,33 +7,33 @@ public class PlayerAttackHitboxHelper : MonoBehaviour
     [SerializeField] PlayerController playerController;
     [Range(0.01f,0.2f)] [SerializeField] float maxTimeActive;
 
-    float activeTimer;
+    float _activeTimer;
+    bool _hasHitEnemy;
 
-    BoxCollider2D _boxCol2D;
     private void Awake()
     {
-        _boxCol2D = GetComponent<BoxCollider2D>();
+        _hasHitEnemy = false;
+        _activeTimer = 0f;
     }
-    private void Start()
-    {
-        activeTimer = 0f;
-    }
+
     private void Update()
     {
-        activeTimer += Time.deltaTime;
-        if (activeTimer > maxTimeActive)
+        _activeTimer += Time.deltaTime;
+        if (_activeTimer > maxTimeActive)
         {
-            activeTimer = 0f;
+            _activeTimer = 0f;
+            _hasHitEnemy = false;
             gameObject.SetActive(false);
         }
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.collider.CompareTag("Enemy"))
+        if (collision.CompareTag("Enemy") && !_hasHitEnemy)
         {
-            //call player controller that we hit something
-            Debug.Log("we hit enemy!");
-
+            _hasHitEnemy = true; //this could make problems when we try to hit multiple enemies at once
+                                 //however without it it detects 2 hits at once
         }
     }
+
+
 }

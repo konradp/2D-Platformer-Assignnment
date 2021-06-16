@@ -11,9 +11,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform GFXtransform;
     [SerializeField] GameObject attackHitbox;
     [Range(0.1f, 2f)] [SerializeField] float attackDelay;
+    [Range(0.1f, 2f)] [SerializeField] float damageImmunityDelay;
     [Range(50,200)][SerializeField] float maxSpeed;
     [Range(3,16)] [SerializeField] float moveSpeed;
     [Range(1000,2500)] [SerializeField] float jumpForce;
+    [Range(100,1000)] [SerializeField] float enemyPushBackForce;
     [SerializeField] float movementSmoothing;
 
     #endregion
@@ -21,11 +23,13 @@ public class PlayerController : MonoBehaviour
     #region Variables
     //references
     Rigidbody2D _rb2D;
+    GameManager _gameManager;
 
     //private vars
     float _animSpeed;
+    int _curHp;
     Vector2 _refVelocity = Vector2.zero;
-    bool _isFacingRight, _isGrounded, _isTouchingWall, _canJump, _canAttack, _animOnGroundFlag;
+    bool _isFacingRight, _isGrounded, _isTouchingWall, _canJump, _canAttack, _canTakeDamage, _animOnGroundFlag;
 
     //input vars
     float _movement;
@@ -37,23 +41,33 @@ public class PlayerController : MonoBehaviour
     //timers
     float _jumpTimer, _jumpTimerMax = 0.3f;
     float _attackTimer, _attackTimerMax;
-    bool _jumpTimerEnabled, _attackTimerEnabled, _attackFlag;
+    float _hitImmunityTimer, _hitImmunityTimerMax;
+    bool _jumpTimerEnabled, _attackTimerEnabled, _hitImmunityTimerEnabled, _attackFlag;
+
+    //getters
+    public int GetHP { get => _curHp; }
     #endregion
 
     #region Game Logic
+    public void OnCreateFromGameManager(int maxHP, GameManager gameManager)
+    {
+        _curHp = maxHP;
+        _gameManager = gameManager;
+    }
     private void Start()
     {
         _rb2D = GetComponent<Rigidbody2D>();
         _isFacingRight = true;
-        _canJump = _canAttack = true;
+        _canJump = _canAttack = _canTakeDamage = true;
         SetUpTimers();
         SetUpFlags();
     }
     private void SetUpTimers()
     {
         _attackTimerMax = attackDelay;
-        _jumpTimer = _attackTimer = 0f;
-        _jumpTimerEnabled = _attackTimerEnabled = false;
+        _hitImmunityTimerMax = damageImmunityDelay;
+        _jumpTimer = _attackTimer = _hitImmunityTimer = 0f;
+        _jumpTimerEnabled = _attackTimerEnabled = _hitImmunityTimerEnabled = false;
     }
     private void SetUpFlags()
     {
@@ -79,7 +93,7 @@ public class PlayerController : MonoBehaviour
     }
     private void UpdateAnimator()
     {
-        _animSpeed = Mathf.Abs(_movement); //todo: make it better
+        _animSpeed = Mathf.Abs(_movement); //todo: make it not reliable on just input
         playerAnimator.SetFloat("Speed", _animSpeed);
     }
     private void CheckIfShouldFlipGFX()
@@ -119,6 +133,16 @@ public class PlayerController : MonoBehaviour
                 _attackTimer = 0f;
             }
         }
+        if (_hitImmunityTimerEnabled)
+        {
+            _hitImmunityTimer += Time.deltaTime;
+            if(_hitImmunityTimer > _hitImmunityTimerMax)
+            {
+                _canTakeDamage = true;
+                _hitImmunityTimerEnabled = false;
+                _hitImmunityTimer = 0f;
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -127,7 +151,6 @@ public class PlayerController : MonoBehaviour
         TryToJump();
         TryToAttack();
     }
-
     private void MoveCharacter()
     {
         _desMove = new Vector2(_movement * moveSpeed, _rb2D.velocity.y);
@@ -173,6 +196,32 @@ public class PlayerController : MonoBehaviour
     public void ChangeWallStatus(bool isTouchingWall)
     {
         _isTouchingWall = isTouchingWall;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Enemy") && _canTakeDamage)
+        {
+            Debug.Log("we got hit by enemy");
+            _canTakeDamage = false;
+            _hitImmunityTimerEnabled = true;
+            _curHp--;
+            _gameManager.OnHitPointChange();
+            _rb2D.AddForce((collision.relativeVelocity + new Vector2(0,2f)) * enemyPushBackForce * 10f);
+            if (_curHp == 0)
+            {
+                //make fancy stuff
+                _gameManager.OnPlayerKilled();
+            }
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Pickable"))
+        {
+            _gameManager.OnCoinCollected();
+            Destroy(collision.gameObject);
+        }
     }
 
     #endregion
