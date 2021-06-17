@@ -23,8 +23,10 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
-    int _playerCoins, _playerLivesLeft, _curLevel;
-    bool _gameLostFlag;
+    int _playerCoins, _playerLivesLeft, _curLevel, _enemiesKilled;
+    int _curLevelCoinsCollected, _curLevelEnemiesKilled;
+    int _maxCoinsToCollect, _maxEnemiesToKill;
+    bool _gameLostFlag, _levelWonFlag;
     GameState _state;
 
     //refs
@@ -54,6 +56,7 @@ public class GameManager : MonoBehaviour
     {
         _playerLivesLeft = playerMaxLives;
         _gameLostFlag = false;
+        _levelWonFlag = false;
         _spawnedPlayer = null;
     }
     //todo: method obsolete, do something different
@@ -70,12 +73,13 @@ public class GameManager : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError("Can't find level helper, sayonara");
+                Debug.LogError($"Can't find level helper, sayonara \n {e.Message}");
                 throw;
             }
             //construct level things
             SetUpHPCounter();
             SpawnPlayer();
+            SetUpCounters();
             OnCoinCountChange();
             OnHitPointChange();
             OnLivesChange();
@@ -85,9 +89,10 @@ public class GameManager : MonoBehaviour
             _state = GameState.MainMenu;
             //restart things
             _playerLivesLeft = playerMaxLives;
-            _playerCoins = 0;
+            _playerCoins = _enemiesKilled = 0;
             _gameLostFlag = false;
             _spawnedPlayer = null;
+            _maxCoinsToCollect = _maxEnemiesToKill = 0;
         }
     }
     private void SetUpHPCounter()
@@ -108,11 +113,23 @@ public class GameManager : MonoBehaviour
         //we should update hp sprites
         OnHitPointChange();
     }
+    private void SetUpCounters()
+    {
+        _levelHelper.CountObjectsInScene();
+        _curLevelEnemiesKilled = _curLevelCoinsCollected = 0;
+        _maxCoinsToCollect += _levelHelper.MaxCoins; //todo: nazewnictwo niespójne
+        _maxEnemiesToKill += _levelHelper.EnemyCount;
+
+    }
     private void Update()
     {
         if (_gameLostFlag && Input.GetButton("Submit"))
         {
             SceneManager.LoadScene(0);
+        }
+        if(_levelWonFlag && Input.GetButton("Submit"))
+        {
+            LoadNextScene();
         }
     }
     public void OnCoinCountChange()
@@ -148,6 +165,11 @@ public class GameManager : MonoBehaviour
             _gameLostFlag = true;
         }
     }
+    public void OnEnemyDestroyed()
+    {
+        _curLevelEnemiesKilled++;
+        _enemiesKilled++;
+    }
     IEnumerator DestroyPlayerOverTime(float delay)
     {
         _playerController.enabled = false;
@@ -158,6 +180,7 @@ public class GameManager : MonoBehaviour
     }
     public void OnCoinCollected()
     {
+        _curLevelCoinsCollected++;
         _playerCoins++;
         OnCoinCountChange();
     }
@@ -166,6 +189,24 @@ public class GameManager : MonoBehaviour
         GameObject.Instantiate(coinPrefab, desTrans.position, Quaternion.identity, _levelHelper.PickableEntitiesTransform);
     }
     public void OnPlayerWonLevel()
+    {
+        _levelHelper.GameWinScreen.SetActive(true);
+        _levelHelper.CollectedCoinsText.text = $"Coins found : {_curLevelCoinsCollected}/{_levelHelper.MaxCoins}";
+        _levelHelper.EnemyKilledText.text = $"Enemies killed : {_curLevelEnemiesKilled}/{_levelHelper.EnemyCount}";
+        Debug.Log($"total killed enemies : {_enemiesKilled}/{_maxEnemiesToKill} ; total collected coins {_playerCoins}/{_maxCoinsToCollect}");
+        if (_levelHelper.IsFinalLevel)
+        {
+            _levelHelper.TotalCoinsCollectedText.text = $"Total coins collected : {_playerCoins}/{_maxCoinsToCollect}";
+            _levelHelper.TotalEnemiesKilledText.text = $"Total killed enemies : {_enemiesKilled}/{_maxEnemiesToKill}";
+            //calc the percentage
+            int var1 = _playerCoins + _enemiesKilled;
+            int var2 = _maxCoinsToCollect + _maxEnemiesToKill;
+            float percentage = ((float)var1 / (float)var2) * 100f;
+            _levelHelper.GameCompletionPercentageText.text = $"Percentage complete: {percentage:n2}%";
+        }
+        _levelWonFlag = true;
+    }
+    void LoadNextScene()
     {
         _curLevel = (_curLevel + 1) % SceneManager.sceneCountInBuildSettings;
         SceneManager.LoadScene(_curLevel);

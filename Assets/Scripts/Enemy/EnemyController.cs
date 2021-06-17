@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : MonoBehaviour, ICoinAcquireable
 {
     #region Serialized Fields
     [SerializeField] bool canAttackPlayer;
@@ -137,11 +137,12 @@ public class EnemyController : MonoBehaviour
         _isAlive = false;
         gameObject.tag = "DeadEnemy";
         gameObject.layer = LayerMask.NameToLayer("DeadEnemy");
+        GameManager.instance.OnEnemyDestroyed();
         StartCoroutine(nameof(DestroyAfterTime));
     }
     IEnumerator DestroyAfterTime()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1.5f);
         GameManager.instance.SpawnCoin(transform);
         Destroy(this.gameObject);
     }

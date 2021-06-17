@@ -5267,10 +5267,13 @@ MonoBehaviour:
   - {fileID: 860146663}
   - {fileID: 1113506506}
   gameOverScreen: {fileID: 1510346047}
+  gameWinScreen: {fileID: 955379976}
   cameraSmoothFollow: {fileID: 519420030}
   livesText: {fileID: 999776787}
   hpText: {fileID: 2139469505}
   coinsText: {fileID: 512573749}
+  collectedCoinsText: {fileID: 1912789842}
+  enemyKilledText: {fileID: 1927356119}
   hpFullSprite: {fileID: 21300000, guid: ba5696f589783134eb13edae77070958, type: 3}
   hpEmptySprite: {fileID: 21300000, guid: 8e94700a3eb058a4ca2a33b08fb1ddd3, type: 3}
 --- !u!1 &955379976
@@ -5290,7 +5293,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &955379977
 RectTransform:
   m_ObjectHideFlags: 0
