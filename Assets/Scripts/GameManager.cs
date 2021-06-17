@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
-    int _playerCoins, _playerLivesLeft;
+    int _playerCoins, _playerLivesLeft, _curLevel;
     bool _gameLostFlag;
     GameState _state;
 
@@ -59,6 +59,7 @@ public class GameManager : MonoBehaviour
     //todo: method obsolete, do something different
     private void OnLevelWasLoaded(int level)
     {
+        _curLevel = level;
         if (level > 0)
         {
             _state = GameState.InLevel;
@@ -96,7 +97,6 @@ public class GameManager : MonoBehaviour
             _levelHelper.HpSprites[i].gameObject.SetActive(false);
         }
     }
-
     void SpawnPlayer()
     {
         _spawnedPlayer = GameObject.Instantiate(playerPrefab, _levelHelper.PlayerRespawnTransform.position, 
@@ -108,7 +108,6 @@ public class GameManager : MonoBehaviour
         //we should update hp sprites
         OnHitPointChange();
     }
-
     private void Update()
     {
         if (_gameLostFlag && Input.GetButton("Submit"))
@@ -165,6 +164,11 @@ public class GameManager : MonoBehaviour
     public void SpawnCoin(Transform desTrans)
     {
         GameObject.Instantiate(coinPrefab, desTrans.position, Quaternion.identity, _levelHelper.PickableEntitiesTransform);
+    }
+    public void OnPlayerWonLevel()
+    {
+        _curLevel = (_curLevel + 1) % SceneManager.sceneCountInBuildSettings;
+        SceneManager.LoadScene(_curLevel);
     }
     #endregion
 }

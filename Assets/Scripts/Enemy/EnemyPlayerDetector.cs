@@ -10,7 +10,6 @@ public class EnemyPlayerDetector : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             enemyController.OnPlayerInRange(collision.transform);
-            Debug.Log("Found Player");
         }
     }
     private void OnTriggerExit2D(Collider2D collision)
@@ -18,8 +17,6 @@ public class EnemyPlayerDetector : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             enemyController.OnPlayerOutOfRange();
-            Debug.Log("Lost Player");
-
         }
     }
 }

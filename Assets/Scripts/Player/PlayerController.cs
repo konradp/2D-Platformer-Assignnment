@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
     float _animSpeed;
     int _curHp;
     Vector2 _refVelocity = Vector2.zero;
-    bool _isFacingRight, _isGrounded, _isTouchingWall, _canJump, _canAttack, _canTakeDamage, _animOnGroundFlag;
+    bool _isFacingRight, _isGrounded, _isTouchingWall, _canJump, _canAttack, _canTakeDamage, _animOnGroundFlag, _canWinGameFlag;
     Vector2 _enemyPushBackVertHelper;
 
     //input vars
@@ -75,6 +75,7 @@ public class PlayerController : MonoBehaviour
     {
         _attackFlag = false;
         _animOnGroundFlag = false;
+        _canWinGameFlag = true;
     }
 
     private void Update()
@@ -206,6 +207,7 @@ public class PlayerController : MonoBehaviour
         {
             GotHit(collision);
         }
+        
     }
     void GotHit(Collision2D collision)
     {
@@ -235,6 +237,12 @@ public class PlayerController : MonoBehaviour
         {
             _gameManager.OnCoinCollected();
             Destroy(collision.gameObject);
+        }
+        if (collision.CompareTag("WinFlag")&& _canWinGameFlag)
+        {
+            Debug.Log("called win level");
+            _gameManager.OnPlayerWonLevel();
+            _canWinGameFlag = false;
         }
     }
 
