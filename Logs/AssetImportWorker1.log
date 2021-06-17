@@ -567,3 +567,28 @@ System memory in use after: 93.7 MB.
 Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 2605.
 Total: 2.887500 ms (FindLiveObjects: 0.246300 ms CreateObjectMapping: 0.073700 ms MarkObjects: 2.420000 ms  DeleteObjects: 0.145400 ms)
 
+========================================================================
+Received Prepare
+Registering precompiled user dll's ...
+Registered in 0.005262 seconds.
+Begin MonoManager ReloadAssembly
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Refreshing native plugins compatible for Editor in 0.60 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Mono: successfully reloaded assembly
+- Completed reload, in  1.457 seconds
+Platform modules already initialized, skipping
+OnLevelWasLoaded was found on GameManager
+This message has been deprecated and will be removed in a later version of Unity.
+Add a delegate to SceneManager.sceneLoaded instead to get notifications after scene loading has completed
+
+Refreshing native plugins compatible for Editor in 0.64 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 2089 Unused Serialized files (Serialized files now loaded: 0)
+System memory in use before: 93.7 MB.
+System memory in use after: 93.7 MB.
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 2609.
+Total: 2.997800 ms (FindLiveObjects: 0.268200 ms CreateObjectMapping: 0.070100 ms MarkObjects: 2.448300 ms  DeleteObjects: 0.209800 ms)
+
