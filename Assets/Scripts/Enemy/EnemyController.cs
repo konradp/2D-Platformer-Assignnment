@@ -24,12 +24,14 @@ public class EnemyController : MonoBehaviour
     
     //private vars
     int _curHP, _curCheckpoint;
-    bool _isGoingRight;
+    bool _isGoingRight, _isAlive, _detectedPlayerInRange;
     Vector2 _refVelocity = Vector2.zero;
 
     //cache
     Vector3 _relativeVector;
     Vector2 _desMove;
+    Transform _detectedPlayer;
+
     #endregion
 
     #region Game Logic
@@ -37,29 +39,45 @@ public class EnemyController : MonoBehaviour
     {
         _curHP = hitPoints;
         _curCheckpoint = 0;
+        _isAlive = true;
         _rb2D = GetComponent<Rigidbody2D>();
     }
     private void Update()
     {
-        switch (enemyState)
+        if(canAttackPlayer && _detectedPlayerInRange)
         {
-            case EnemyBehaviourStates.StandingStill:
-                break;
-            case EnemyBehaviourStates.Patrolling:
-                //if we don't have any patrol points, bail
-                if (patrolPoints.Length == 0)
-                {
-                    Debug.LogWarning($"No patrol points for {gameObject.name}, switching state");
-                    enemyState = EnemyBehaviourStates.StandingStill;
+            MoveTowardsPlayer();
+            UpdateAnimations();
+        }
+        else
+        {
+            switch (enemyState)
+            {
+                case EnemyBehaviourStates.StandingStill:
                     break;
-                }
-                MoveTowardsCheckpoint();
-                CheckpointCheck();
-                UpdateAnimations();
-                break;
+                case EnemyBehaviourStates.Patrolling:
+                    //if we don't have any patrol points, bail
+                    if (patrolPoints.Length == 0)
+                    {
+                        Debug.LogWarning($"No patrol points for {gameObject.name}, switching state");
+                        enemyState = EnemyBehaviourStates.StandingStill;
+                        break;
+                    }
+                    MoveTowardsCheckpoint();
+                    CheckpointCheck();
+                    UpdateAnimations();
+                    break;
+            }
         }
     }
 
+    private void MoveTowardsPlayer()
+    {
+        if (_isAlive)
+        {
+            MoveTowardsPosition(_detectedPlayer.position);
+        }
+    }
     private void UpdateAnimations()
     {
         animator.SetFloat("Speed", Mathf.Abs(_desMove.x));
@@ -87,8 +105,15 @@ public class EnemyController : MonoBehaviour
     }
     private void MoveTowardsCheckpoint()
     {
+        if (_isAlive)
+        {
+            MoveTowardsPosition(patrolPoints[_curCheckpoint].position);
+        }
+    }
+    private void MoveTowardsPosition(Vector3 desPos)
+    {
         //getting vector towards checkpoint, relative to current position
-        _relativeVector = transform.InverseTransformPoint(patrolPoints[_curCheckpoint].position).normalized;
+        _relativeVector = transform.InverseTransformPoint(desPos).normalized;
         _desMove = new Vector2(_relativeVector.x * moveSpeed, _rb2D.velocity.y);
         _isGoingRight = _relativeVector.x > 0 ? true : false;
         _rb2D.velocity = Vector2.SmoothDamp(_rb2D.velocity, _desMove, ref _refVelocity, movementSmoothing, maxSpeed);
@@ -100,10 +125,18 @@ public class EnemyController : MonoBehaviour
         {
             KillEntity();
         }
+        else
+        {
+            animator.SetTrigger("GotHitTrigger");
+        }
     }
     void KillEntity()
     {
         animator.SetTrigger("DeathTrigger");
+        animator.SetBool("IsDead", true);
+        _isAlive = false;
+        gameObject.tag = "DeadEnemy";
+        gameObject.layer = LayerMask.NameToLayer("DeadEnemy");
         StartCoroutine(nameof(DestroyAfterTime));
     }
     IEnumerator DestroyAfterTime()
@@ -111,6 +144,18 @@ public class EnemyController : MonoBehaviour
         yield return new WaitForSeconds(2f);
         GameManager.instance.SpawnCoin(transform);
         Destroy(this.gameObject);
+    }
+
+    public void OnPlayerInRange(Transform player)
+    {
+        _detectedPlayer = player;
+        _detectedPlayerInRange = true;
+    }
+    public void OnPlayerOutOfRange()
+    {
+        _detectedPlayer = null;
+        _detectedPlayerInRange = false;
+        animator.SetFloat("Speed", 0);
     }
     #endregion
 }

@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject coinPrefab;
     [Range(1,5)] [SerializeField] int playerMaxHitPoints;
     [Range(1, 10)] [SerializeField] int playerMaxLives;
+    [Range(1f, 5f)] [SerializeField] float deathDelay;
     #endregion
 
     #region Variables
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
         _gameLostFlag = false;
         _spawnedPlayer = null;
     }
-    //todo: method obsolete, try something different
+    //todo: method obsolete, do something different
     private void OnLevelWasLoaded(int level)
     {
         if (level > 0)
@@ -140,17 +141,21 @@ public class GameManager : MonoBehaviour
     public void OnPlayerKilled()
     {
         _playerLivesLeft--;
-        GameObject.Destroy(_spawnedPlayer);
+        StartCoroutine(nameof(DestroyPlayerOverTime),deathDelay);
         OnLivesChange();
         if (_playerLivesLeft == 0)
         {
             _levelHelper.GameOverScreen.SetActive(true);
             _gameLostFlag = true;
         }
-        else
-        {
+    }
+    IEnumerator DestroyPlayerOverTime(float delay)
+    {
+        _playerController.enabled = false;
+        yield return new WaitForSeconds(delay);
+        GameObject.Destroy(_spawnedPlayer);
+        if(_playerLivesLeft>0)
             SpawnPlayer();
-        }
     }
     public void OnCoinCollected()
     {

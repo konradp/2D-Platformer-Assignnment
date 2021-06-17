@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Pickable
   - PlayerSword
+  - DeadEnemy
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - PlayerGroundCheck
   - PlayerSword
   - Pickable
-  - 
+  - DeadEnemy
   - 
   - 
   - 

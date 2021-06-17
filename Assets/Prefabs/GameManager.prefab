@@ -47,3 +47,4 @@ MonoBehaviour:
   coinPrefab: {fileID: 4607944715716834603, guid: 878a6178ce5e12b4b95a5b0e8e005710, type: 3}
   playerMaxHitPoints: 3
   playerMaxLives: 2
+  deathDelay: 2

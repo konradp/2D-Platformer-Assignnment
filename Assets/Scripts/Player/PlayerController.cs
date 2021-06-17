@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     #region Serialized Variables
 
     [SerializeField] Animator playerAnimator;
+    [SerializeField] Animator playerHitAnimator;
     [SerializeField] Transform GFXtransform;
     [SerializeField] GameObject attackHitbox;
     [Range(0.1f, 2f)] [SerializeField] float attackDelay;
@@ -15,7 +16,7 @@ public class PlayerController : MonoBehaviour
     [Range(50,200)][SerializeField] float maxSpeed;
     [Range(3,16)] [SerializeField] float moveSpeed;
     [Range(1000,2500)] [SerializeField] float jumpForce;
-    [Range(100,1000)] [SerializeField] float enemyPushBackForce;
+    [Range(50,600)] [SerializeField] float enemyPushBackForce;
     [SerializeField] float movementSmoothing;
 
     #endregion
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
     int _curHp;
     Vector2 _refVelocity = Vector2.zero;
     bool _isFacingRight, _isGrounded, _isTouchingWall, _canJump, _canAttack, _canTakeDamage, _animOnGroundFlag;
+    Vector2 _enemyPushBackVertHelper;
 
     //input vars
     float _movement;
@@ -202,18 +204,30 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.collider.CompareTag("Enemy") && _canTakeDamage)
         {
-            Debug.Log("we got hit by enemy");
-            _canTakeDamage = false;
-            _hitImmunityTimerEnabled = true;
-            _curHp--;
-            _gameManager.OnHitPointChange();
-            _rb2D.AddForce((collision.relativeVelocity + new Vector2(0,2f)) * enemyPushBackForce * 10f);
-            if (_curHp == 0)
-            {
-                //make fancy stuff
-                _gameManager.OnPlayerKilled();
-            }
+            GotHit(collision);
         }
+    }
+    void GotHit(Collision2D collision)
+    {
+        _canTakeDamage = false;
+        _hitImmunityTimerEnabled = true;
+        _curHp--;
+        _gameManager.OnHitPointChange();
+        if (Mathf.Abs(collision.relativeVelocity.y) > 5f)
+            _enemyPushBackVertHelper = new Vector2(0f, -4f); //fixing Y value because we don't want to fly off into the distance
+        else
+            _enemyPushBackVertHelper = new Vector2(0, 2f);
+        _rb2D.AddForce((collision.relativeVelocity + _enemyPushBackVertHelper) * enemyPushBackForce * 10f);
+        playerHitAnimator.SetTrigger("HitTrigger");
+
+        if (_curHp == 0)
+        {
+            playerAnimator.SetBool("IsDead", true);
+            playerAnimator.SetTrigger("DeathTrigger");
+            _gameManager.OnPlayerKilled();
+        }
+
+
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

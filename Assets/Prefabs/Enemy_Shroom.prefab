@@ -199,9 +199,7 @@ MonoBehaviour:
   canAttackPlayer: 0
   enemyState: 1
   hitPoints: 2
-  patrolPoints:
-  - {fileID: 0}
-  - {fileID: 0}
+  patrolPoints: []
   moveSpeed: 4
   maxSpeed: 50
   movementSmoothing: 0.05
