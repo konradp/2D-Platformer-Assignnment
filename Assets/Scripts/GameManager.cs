@@ -132,6 +132,11 @@ public class GameManager : MonoBehaviour
             LoadNextScene();
         }
     }
+    public void ChangeGameDifficulty(int hp, int lives)
+    {
+        playerMaxHitPoints = hp;
+        playerMaxLives = _playerLivesLeft = lives;
+    }
     public void OnCoinCountChange()
     {
         _levelHelper.CoinsText.text = $"X {_playerCoins}";
