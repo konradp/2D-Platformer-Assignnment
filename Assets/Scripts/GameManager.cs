@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -20,10 +19,11 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Variables
-
+    //instance
     public static GameManager instance;
 
-    int _playerCoins, _playerLivesLeft, _curLevel, _enemiesKilled;
+    //private vars
+    int _playerCoins, _playerLivesLeft, _curLevelIndex, _enemiesKilled;
     int _curLevelCoinsCollected, _curLevelEnemiesKilled;
     int _maxCoinsToCollect, _maxEnemiesToKill;
     bool _gameLostFlag, _levelWonFlag;
@@ -63,11 +63,10 @@ public class GameManager : MonoBehaviour
         _levelWonFlag = false;
         _spawnedPlayer = null;
     }
-
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        _curLevel = scene.buildIndex;
-        if (_curLevel > 0)
+        _curLevelIndex = scene.buildIndex;
+        if (_curLevelIndex > 0)
         {
             _state = GameState.InLevel;
             //search for LevelHelper
@@ -77,7 +76,7 @@ public class GameManager : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError($"Can't find level helper, sayonara \n {e.Message}");
+                Debug.LogError($"Can't find level helper \n {e.Message}");
                 throw;
             }
             //construct level things
@@ -121,7 +120,7 @@ public class GameManager : MonoBehaviour
     {
         _levelHelper.CountObjectsInScene();
         _curLevelEnemiesKilled = _curLevelCoinsCollected = 0;
-        _maxCoinsToCollect += _levelHelper.MaxCoins; //todo: nazewnictwo niespójne
+        _maxCoinsToCollect += _levelHelper.AllCoinsInLevel; 
         _maxEnemiesToKill += _levelHelper.EnemyCount;
 
     }
@@ -200,25 +199,31 @@ public class GameManager : MonoBehaviour
     public void OnPlayerWonLevel()
     {
         _levelHelper.GameWinScreen.SetActive(true);
-        _levelHelper.CollectedCoinsText.text = $"Coins found : {_curLevelCoinsCollected}/{_levelHelper.MaxCoins}";
+        ChangeEndGameText();
+        _levelWonFlag = true;
+    }
+    private void ChangeEndGameText()
+    {
+        _levelHelper.CollectedCoinsText.text = $"Coins found : {_curLevelCoinsCollected}/{_levelHelper.AllCoinsInLevel}";
         _levelHelper.EnemyKilledText.text = $"Enemies killed : {_curLevelEnemiesKilled}/{_levelHelper.EnemyCount}";
-        Debug.Log($"total killed enemies : {_enemiesKilled}/{_maxEnemiesToKill} ; total collected coins {_playerCoins}/{_maxCoinsToCollect}");
         if (_levelHelper.IsFinalLevel)
         {
             _levelHelper.TotalCoinsCollectedText.text = $"Total coins collected : {_playerCoins}/{_maxCoinsToCollect}";
             _levelHelper.TotalEnemiesKilledText.text = $"Total killed enemies : {_enemiesKilled}/{_maxEnemiesToKill}";
-            //calc the percentage
-            int var1 = _playerCoins + _enemiesKilled;
-            int var2 = _maxCoinsToCollect + _maxEnemiesToKill;
-            float percentage = ((float)var1 / (float)var2) * 100f;
-            _levelHelper.GameCompletionPercentageText.text = $"Percentage complete: {percentage:n2}%";
+            _levelHelper.GameCompletionPercentageText.text = $"Percentage complete: {GetCompletionPercentage():n2}%";
         }
-        _levelWonFlag = true;
+    }
+    private float GetCompletionPercentage()
+    {
+        //calc the percentage
+        int var1 = _playerCoins + _enemiesKilled;
+        int var2 = _maxCoinsToCollect + _maxEnemiesToKill;
+        return ((float)var1 / (float)var2) * 100f;
     }
     void LoadNextScene()
     {
-        _curLevel = (_curLevel + 1) % SceneManager.sceneCountInBuildSettings;
-        SceneManager.LoadScene(_curLevel);
+        _curLevelIndex = (_curLevelIndex + 1) % SceneManager.sceneCountInBuildSettings;
+        SceneManager.LoadScene(_curLevelIndex);
     }
     private void OnDisable()
     {

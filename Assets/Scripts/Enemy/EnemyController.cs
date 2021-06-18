@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -54,6 +53,7 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
             switch (enemyState)
             {
                 case EnemyBehaviourStates.StandingStill:
+                    //do nothing, left as switch-case for easier future expansion
                     break;
                 case EnemyBehaviourStates.Patrolling:
                     //if we don't have any patrol points, bail
@@ -70,7 +70,6 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
             }
         }
     }
-
     private void MoveTowardsPlayer()
     {
         if (_isAlive)
@@ -93,11 +92,12 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
             _curCheckpoint = (_curCheckpoint + 1) % patrolPoints.Length;
         }
     }
-    bool IsNearCheckpoint(Vector2 enemyPos, Vector2 checkpointPos)
+    bool IsNearCheckpoint(Vector2 curPos, Vector2 desPos)
     {
         //note: only taking X value because we won't have vertical movement
-        int _pos1 = Convert.ToInt32(Mathf.Round(enemyPos.x * 10f));
-        int _pos2 = Convert.ToInt32(Mathf.Round(checkpointPos.x * 10f));
+        //rounding to first decimal place to compromise between accuarcy and cpu usage
+        int _pos1 = Convert.ToInt32(Mathf.Round(curPos.x * 10f));
+        int _pos2 = Convert.ToInt32(Mathf.Round(desPos.x * 10f));
         if (_pos1==_pos2)
             return true;
         else
@@ -112,7 +112,7 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
     }
     private void MoveTowardsPosition(Vector3 desPos)
     {
-        //getting vector towards checkpoint, relative to current position
+        //getting vector towards checkpoint/player, relative to current position
         _relativeVector = transform.InverseTransformPoint(desPos).normalized;
         _desMove = new Vector2(_relativeVector.x * moveSpeed, _rb2D.velocity.y);
         _isGoingRight = _relativeVector.x > 0 ? true : false;
@@ -122,13 +122,9 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
     {
         _curHP--;
         if (_curHP == 0)
-        {
             KillEntity();
-        }
         else
-        {
             animator.SetTrigger("GotHitTrigger");
-        }
     }
     void KillEntity()
     {
@@ -146,7 +142,6 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
         GameManager.instance.SpawnCoin(transform);
         Destroy(this.gameObject);
     }
-
     public void OnPlayerInRange(Transform player)
     {
         _detectedPlayer = player;
@@ -156,7 +151,7 @@ public class EnemyController : MonoBehaviour, ICoinAcquireable
     {
         _detectedPlayer = null;
         _detectedPlayerInRange = false;
-        animator.SetFloat("Speed", 0);
+        animator.SetFloat("Speed", 0); //animation fix
     }
     #endregion
 }

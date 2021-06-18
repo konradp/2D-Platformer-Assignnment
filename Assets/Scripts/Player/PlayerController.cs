@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -77,7 +74,6 @@ public class PlayerController : MonoBehaviour
         _animOnGroundFlag = false;
         _canWinGameFlag = true;
     }
-
     private void Update()
     {
         AssignMovement();
@@ -96,16 +92,16 @@ public class PlayerController : MonoBehaviour
     }
     private void UpdateAnimator()
     {
-        _animSpeed = Mathf.Abs(_movement); //todo: make it not reliable on just input
+        _animSpeed = Mathf.Abs(_desMove.x);
         playerAnimator.SetFloat("Speed", _animSpeed);
     }
     private void CheckIfShouldFlipGFX()
     {
         //if we try to move right but facing left
-        if (_movement > 0f && !_isFacingRight)
+        if (_movement > 0.1f && !_isFacingRight)
             FlipGFXandHitbox();
         //or we try to move left, and player is facing right
-        else if (_movement < 0 && _isFacingRight)
+        else if (_movement < -0.1f && _isFacingRight)
             FlipGFXandHitbox();
     }
     private void FlipGFXandHitbox()
@@ -147,7 +143,6 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
     private void FixedUpdate()
     {
         MoveCharacter();
@@ -174,8 +169,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_canAttack && _attackFlag)
         {
-            _canAttack = false;
-            _attackFlag = false;
+            _canAttack = _attackFlag = false;
             _attackTimerEnabled = true;
             attackHitbox.SetActive(true);
             playerAnimator.SetTrigger("AttackTrigger");
@@ -183,31 +177,26 @@ public class PlayerController : MonoBehaviour
     }
     public void ChangeGroundedStatus(bool isGrounded)
     {
+        _isGrounded = isGrounded;
         //todo: make it better and more readable
-        if(isGrounded && !_animOnGroundFlag)
+        if (_isGrounded && !_animOnGroundFlag)
         {
             playerAnimator.SetTrigger("StoodOnGroundTrigger");
             _animOnGroundFlag = true;
-        }else if(!isGrounded && _animOnGroundFlag)
+        }else if(!_isGrounded && _animOnGroundFlag)
         {
             playerAnimator.ResetTrigger("StoodOnGroundTrigger");
             _animOnGroundFlag = false;
         }
-
-        _isGrounded = isGrounded;
     }
     public void ChangeWallStatus(bool isTouchingWall)
     {
         _isTouchingWall = isTouchingWall;
     }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.collider.CompareTag("Enemy") && _canTakeDamage)
-        {
             GotHit(collision);
-        }
-        
     }
     void GotHit(Collision2D collision)
     {
@@ -215,21 +204,27 @@ public class PlayerController : MonoBehaviour
         _hitImmunityTimerEnabled = true;
         _curHp--;
         _gameManager.OnHitPointChange();
+        AddPushBack(collision);
+        SetHitAnimationVars();
+        if (_curHp == 0)
+            _gameManager.OnPlayerKilled();
+    }
+    void AddPushBack(Collision2D collision)
+    {
         if (Mathf.Abs(collision.relativeVelocity.y) > 5f)
-            _enemyPushBackVertHelper = new Vector2(0f, -4f); //fixing Y value because we don't want to fly off into the distance
+            _enemyPushBackVertHelper = new Vector2(0f, -4f); //fixing Y value because we don't want to fly off into the oblivion
         else
-            _enemyPushBackVertHelper = new Vector2(0, 2f);
+            _enemyPushBackVertHelper = new Vector2(0, 2f); //if we're hit horizontally, add a little upward pushback
         _rb2D.AddForce((collision.relativeVelocity + _enemyPushBackVertHelper) * enemyPushBackForce * 10f);
+    }
+    void SetHitAnimationVars()
+    {
         playerHitAnimator.SetTrigger("HitTrigger");
-
         if (_curHp == 0)
         {
             playerAnimator.SetBool("IsDead", true);
             playerAnimator.SetTrigger("DeathTrigger");
-            _gameManager.OnPlayerKilled();
         }
-
-
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

@@ -1,7 +1,4 @@
-using System;
 using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,7 +25,7 @@ public class LevelHelper : MonoBehaviour
     [SerializeField] Sprite hpEmptySprite;
 
     //private vars
-    int _maxCoins, _enemyCount;
+    int _coinsInLevel, _enemyCount;
 
     //getters
     public Transform PlayerRespawnTransform { get => playerRespawnTransform; set => playerRespawnTransform = value; }
@@ -44,7 +41,7 @@ public class LevelHelper : MonoBehaviour
     public Sprite HpEmptySprite { get => hpEmptySprite; set => hpEmptySprite = value; }
     public Text CollectedCoinsText { get => collectedCoinsText; set => collectedCoinsText = value; }
     public Text EnemyKilledText { get => enemyKilledText; set => enemyKilledText = value; }
-    public int MaxCoins { get => _maxCoins; set => _maxCoins = value; }
+    public int AllCoinsInLevel { get => _coinsInLevel; set => _coinsInLevel = value; }
     public int EnemyCount { get => _enemyCount; set => _enemyCount = value; }
     public GameObject GameWinScreen { get => gameWinScreen; set => gameWinScreen = value; }
     public bool IsFinalLevel { get => isFinalLevel; set => isFinalLevel = value; }
@@ -62,10 +59,9 @@ public class LevelHelper : MonoBehaviour
     public void CountObjectsInScene()
     {
         var coins = FindObjectsOfType<MonoBehaviour>().OfType<ICoinAcquireable>();
-        _maxCoins = coins.Count();
+        _coinsInLevel = coins.Count();
         var enemies = FindObjectsOfType<EnemyController>();
         _enemyCount = enemies.Count();
     }
-
     #endregion
 }

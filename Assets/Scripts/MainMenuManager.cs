@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -20,8 +18,8 @@ public class MainMenuManager : MonoBehaviour
 
     GameManager _gameManager;
     GameDifficulty _selectedDifficulty;
-    int[] _hitPointsPerDifficulty = { 5, 3, 2, 1 };
-    int[] _livesPerDifficulty = { 20, 4, 2, 1 };
+    readonly int[] _hitPointsPerDifficulty = { 5, 3, 2, 1 };
+    readonly int[] _livesPerDifficulty = { 20, 4, 2, 1 };
     private void Start()
     {
         AcquireGameManagerInstance();
@@ -37,7 +35,7 @@ public class MainMenuManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"GM is nowhere to be found :( \n {e.Message}");
+            Debug.LogError($"GM is nowhere to be found \n {e.Message}");
             throw;
         }
     }
@@ -58,6 +56,9 @@ public class MainMenuManager : MonoBehaviour
             case GameDifficulty.hardcore:
                 UpdateDifficulty(_selectedDifficulty.ToString(), _hitPointsPerDifficulty[3], _livesPerDifficulty[3]);
                 break;
+            default:
+                Debug.LogError("Difficulty enum couldn't be processed!");
+                break;
         }
     }
     public void StartGameButton()
@@ -69,15 +70,14 @@ public class MainMenuManager : MonoBehaviour
         difficultyNameText.text = $"Selected Difficulty : {shortName}";
         difficultyExplainedText.text = $"Current Lives : {lives} \nCurrent HP : {hp}";
         if (_gameManager != null)
-        {
             _gameManager.ChangeGameDifficulty(hp, lives);
-        }
         else
         {
+            Debug.LogError("Couldn't update difficulty, because game manager cannot be found! Trying to find it...");
             AcquireGameManagerInstance();
             UpdateDifficulty(shortName, hp, lives);
         }
     }
 
-    
+
 }
