@@ -178,16 +178,11 @@ public class PlayerController : MonoBehaviour
     public void ChangeGroundedStatus(bool isGrounded)
     {
         _isGrounded = isGrounded;
-        //todo: make it better and more readable
         if (_isGrounded && !_animOnGroundFlag)
-        {
             playerAnimator.SetTrigger("StoodOnGroundTrigger");
-            _animOnGroundFlag = true;
-        }else if(!_isGrounded && _animOnGroundFlag)
-        {
+        else if(!_isGrounded && _animOnGroundFlag)
             playerAnimator.ResetTrigger("StoodOnGroundTrigger");
-            _animOnGroundFlag = false;
-        }
+        _animOnGroundFlag = !_animOnGroundFlag;
     }
     public void ChangeWallStatus(bool isTouchingWall)
     {
