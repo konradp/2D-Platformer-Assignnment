@@ -86,6 +86,8 @@ public class GameManager : MonoBehaviour
             OnCoinCountChange();
             OnHitPointChange();
             OnLivesChange();
+            //reset level won flag
+            _levelWonFlag = false;
         }
         else
         {
