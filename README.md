@@ -39,3 +39,7 @@ Left Stick : Movement
 B/Circle : Jump
 
 A/Cross : Attack
+
+Copyright 2021 Konrad Potempski
+
+For any part of this work for which the license is applicable, this work is licensed under the Attribution-NonCommercial-NoDerivatives 4.0 International license. See Licence.md.
