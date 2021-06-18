@@ -240,7 +240,6 @@ public class PlayerController : MonoBehaviour
         }
         if (collision.CompareTag("WinFlag")&& _canWinGameFlag)
         {
-            Debug.Log("called win level");
             _gameManager.OnPlayerWonLevel();
             _canWinGameFlag = false;
         }

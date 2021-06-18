@@ -36,6 +36,10 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Game Logic
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
     private void Awake()
     {
         //create instance
@@ -59,11 +63,11 @@ public class GameManager : MonoBehaviour
         _levelWonFlag = false;
         _spawnedPlayer = null;
     }
-    //todo: method obsolete, do something different
-    private void OnLevelWasLoaded(int level)
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        _curLevel = level;
-        if (level > 0)
+        _curLevel = scene.buildIndex;
+        if (_curLevel > 0)
         {
             _state = GameState.InLevel;
             //search for LevelHelper
@@ -215,6 +219,10 @@ public class GameManager : MonoBehaviour
     {
         _curLevel = (_curLevel + 1) % SceneManager.sceneCountInBuildSettings;
         SceneManager.LoadScene(_curLevel);
+    }
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     #endregion
 }
