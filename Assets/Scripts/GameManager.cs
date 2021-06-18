@@ -132,7 +132,7 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(0);
         }
-        if(_levelWonFlag && Input.GetButton("Submit"))
+        if(_levelWonFlag && Input.GetButtonUp("Submit"))
         {
             LoadNextScene();
         }
@@ -225,6 +225,10 @@ public class GameManager : MonoBehaviour
     void LoadNextScene()
     {
         _curLevelIndex = (_curLevelIndex + 1) % SceneManager.sceneCountInBuildSettings;
+#if UNITY_WEBGL
+        if (_levelHelper.IsFinalLevel)
+            SceneManager.LoadScene(0);
+#endif
         SceneManager.LoadScene(_curLevelIndex);
     }
     private void OnDisable()
